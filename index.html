@@ -35,6 +35,7 @@
     <button class="tab-btn" data-tab="roster">League Roster</button>
     <button class="tab-btn" data-tab="print">Print Sheet (A4)</button>
     <button class="tab-btn" data-tab="quickref">Quick Reference</button>
+    <button class="tab-btn" data-tab="rules-index">Rules Index</button>
     <button class="tab-btn" data-tab="about">About</button>
   </nav>
   <div class="backup-actions">
@@ -751,6 +752,35 @@
   </div>
 </section>
 
+<!-- ===================== RULES INDEX ===================== -->
+<section id="tab-rules-index" class="tab-panel">
+  <div class="panel">
+    <div class="gallery-toolbar">
+      <h2>Rules Index</h2>
+      <div class="gallery-meta ri-controls">
+        <input type="search" id="ri-search" class="ri-search" placeholder="Search keywords, e.g. peril, burst, director" autocomplete="off" aria-label="Search rules keywords">
+        <select id="ri-book" class="theme-filter-select" aria-label="Filter by book">
+          <option value="">All books</option>
+        </select>
+        <select id="ri-type" class="theme-filter-select" aria-label="Filter by type">
+          <option value="">All types</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">Find a keyword, then read the rule in the book. Page numbers are the printed page numbers in each book, not the PDF page. This index points to the rule and does not reproduce it. Search also matches common alternative words, such as "initiative" for Director.</p>
+    <p id="ri-count" class="ri-count" aria-live="polite"></p>
+    <div class="ri-table-wrap">
+      <table class="ri-table">
+        <thead>
+          <tr><th>Keyword</th><th>Book</th><th class="ri-page-col">Page</th><th class="ri-section-col">Section</th></tr>
+        </thead>
+        <tbody id="ri-body"></tbody>
+      </table>
+    </div>
+    <p id="ri-empty" class="hint" style="display:none">No keywords match. Try a shorter word or clear the book and type filters.</p>
+  </div>
+</section>
+
 <!-- ===================== ABOUT ===================== -->
 <section id="tab-about" class="tab-panel">
   <div class="panel about-panel">
@@ -795,7 +825,7 @@
 </main>
 
 <footer class="site-footer">
-  <p><a href="https://github.com/justadude-g/Pulp-Alley/issues" target="_blank" rel="noopener">Feedback</a> · Version 2026-10-29</p>
+  <p><a href="https://github.com/justadude-g/Pulp-Alley/issues" target="_blank" rel="noopener">Feedback</a> · Version 2026-11-01</p>
   <p>Community tool for the Pulp Alley, made with permission from David Phipps. <a href="https://www.pulpalley.com" target="_blank" rel="noopener">Pulp Alley</a></p>
 </footer>
 
@@ -962,6 +992,8 @@
 <script src="js/associatesData.js"></script>
 <script src="js/resourceCardsData.js"></script>
 <script src="js/rosterRules.js"></script>
+<script src="js/rulesIndexData.js"></script>
+<script src="js/rulesIndex.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

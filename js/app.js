@@ -29,6 +29,7 @@ function activateTab(tab) {
   if (tab === 'gallery') refreshGallery();
   if (tab === 'roster') refreshRosterTab();
   if (tab === 'print') refreshPrintSheet();
+  if (tab === 'rules-index') { const ri = document.getElementById('ri-search'); if (ri) ri.focus(); }
 }
 document.getElementById('go-print').addEventListener('click', () => activateTab('print'));
 

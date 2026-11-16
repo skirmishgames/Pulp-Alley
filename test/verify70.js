@@ -1,4 +1,4 @@
-// verify70.js — About page feedback section uses the games@staroversky.com address, not GitHub.
+// verify70.js — About page feedback section uses the skirmishgames.app@gmail.com address, not GitHub.
 const { chromium } = require('playwright');
 const path = require('path');
 const http = require('http');
@@ -17,12 +17,12 @@ function ok(label) { console.log('OK  ', label); }
   await page.click('.tab-btn[data-tab="about"]');
   const hrefs = await page.$$eval('#tab-about a', as => as.map(a => a.getAttribute('href')));
   assert(!hrefs.some(h => /github\.com/.test(h)), 'no GitHub links on the About page');
-  assert(hrefs.some(h => h.startsWith('mailto:games@staroversky.com')), 'mailto link to games@staroversky.com');
+  assert(hrefs.some(h => h.startsWith('mailto:skirmishgames.app@gmail.com')), 'mailto link to skirmishgames.app@gmail.com');
   const text = await page.textContent('#tab-about');
   assert(!/GitHub/i.test(text), 'About text does not mention GitHub');
-  assert(text.includes('games@staroversky.com'), 'address shown as text');
+  assert(text.includes('skirmishgames.app@gmail.com'), 'address shown as text');
   assert(hrefs.includes('https://www.pulpalley.com/'), 'Pulp Alley link kept');
-  ok('About page feedback uses games@staroversky.com and has no GitHub links');
+  ok('About page feedback uses skirmishgames.app@gmail.com and has no GitHub links');
   await browser.close(); server.close();
   console.log('verify70: all checks passed');
 })().catch(e => { console.error(e); process.exit(1); });

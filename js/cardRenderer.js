@@ -606,6 +606,13 @@ function renderPortraitCrop(img, view, box) {
   return c.toDataURL('image/png');
 }
 
+// Name shown for a card's type. A Gang card can be styled "Fireteam" (same
+// rules, different label — see gangStyle in the Designer); every other type
+// shows its own name.
+function cardTypeLabel(cardType, gangStyle) {
+  return (cardType === 'Gang' && gangStyle === 'Fireteam') ? 'Fireteam' : cardType;
+}
+
 // Top-right Card Type pill shared by renderCard and renderAssetCard. 27px label, pill height centered on the Name text's own
 // vertical center (NAME_BAR_H/2+2). Returns the pill's left edge (x).
 function drawCardTypeTag(ctx, cardType, accent, tint) {
@@ -734,7 +741,7 @@ function renderCard(canvas, data, opts = {}) {
   // keep clear of it.
   let tagLeft = CARD_W;
   if (data.showCardType && data.cardType) {
-    tagLeft = drawCardTypeTag(ctx, data.cardType, accent, tint);
+    tagLeft = drawCardTypeTag(ctx, cardTypeLabel(data.cardType, data.gangStyle), accent, tint);
   }
 
   // Name text (auto-shrink to fit), centered on the card's own true

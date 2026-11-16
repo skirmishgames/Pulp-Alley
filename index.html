@@ -193,12 +193,19 @@
       </fieldset>
 
       <fieldset id="gang-fieldset" style="display:none">
-        <legend>Gang</legend>
+        <legend id="gang-legend">Gang</legend>
         <div class="field-row">
+          <label class="narrow gang-style-field" title="Gang and Fireteam use the same rules. Fireteam only changes the label (for squads of trained troops, like stormtroopers).">Style
+            <select id="f-gangStyle">
+              <option value="Gang">Gang</option>
+              <option value="Fireteam">Fireteam</option>
+            </select>
+          </label>
           <label class="narrow">Current Models
             <input type="number" id="f-gangModels" value="5" min="3" max="12">
           </label>
         </div>
+        <p class="hint" id="gang-style-hint" style="display:none">A Fireteam follows all the Gang rules. Only the name on the card, roster and lists changes.</p>
         <p class="hint">Brawl/Shoot/Might auto-fill in the Stats section below — 1d6 per 2 models (rounded up). Dodge/Cunning/Finesse are fixed at 1d6. You can still hand-edit any stat after auto-fill.</p>
       </fieldset>
 
@@ -823,7 +830,7 @@
 </main>
 
 <footer class="site-footer">
-  <p><a href="https://github.com/justadude-g/Pulp-Alley/issues" target="_blank" rel="noopener">Feedback</a> · Version 2026-11-05</p>
+  <p><a href="https://github.com/justadude-g/Pulp-Alley/issues" target="_blank" rel="noopener">Feedback</a> · Version 2026-11-16</p>
   <p>Community tool for the Pulp Alley, made with permission from David Phipps. <a href="https://www.pulpalley.com" target="_blank" rel="noopener">Pulp Alley</a></p>
 </footer>
 

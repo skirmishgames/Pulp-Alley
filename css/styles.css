@@ -1121,3 +1121,5 @@ body.copying-roster-sheet #roster-print-sheet {
   .ri-table td, .ri-table th { padding: 7px 8px; }
   .ri-table .ri-section-col, .ri-table td.ri-section { display: none; }
 }
+
+.gang-style-field { min-width: 140px; }

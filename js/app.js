@@ -649,6 +649,17 @@ const gangFieldset = document.getElementById('gang-fieldset');
 const standardHealthFields = document.getElementById('standard-health-fields');
 const gangHealthFields = document.getElementById('gang-health-fields');
 const gangModelsInput = document.getElementById('f-gangModels');
+const gangStyleEl = document.getElementById('f-gangStyle');
+const gangLegendEl = document.getElementById('gang-legend');
+const gangStyleHintEl = document.getElementById('gang-style-hint');
+
+// Gang and Fireteam share every rule; the style only changes the label.
+function updateGangStyleLabel() {
+  const isFire = gangStyleEl.value === 'Fireteam';
+  gangLegendEl.textContent = isFire ? 'Fireteam' : 'Gang';
+  gangStyleHintEl.style.display = isFire ? '' : 'none';
+}
+gangStyleEl.addEventListener('change', () => { updateGangStyleLabel(); updatePreview(); });
 
 function toggleGangFields(isGang) {
   gangFieldset.style.display = isGang ? 'block' : 'none';
@@ -980,6 +991,8 @@ function collectFormData() {
     // Type). Off by default; cards saved before it existed have no key and
     // stay off.
     showCardType: document.getElementById('f-showCardType').checked,
+    // Gang cards only: 'Gang' (default) or 'Fireteam' — a label-only choice.
+    gangStyle: document.getElementById('f-cardType').value === 'Gang' ? gangStyleEl.value : 'Gang',
     // Backup only: which p. 97 row the card was built from.
     backupOption: isTemporaryCharacterType(document.getElementById('f-cardType').value) ? backupOptionEl.value : '',
     assetCost: +document.getElementById('f-assetCost').value || 0,
@@ -1215,6 +1228,7 @@ document.getElementById('btn-new-card').addEventListener('click', () => {
   state.abilities = [{ name: '', text: '' }];
   form.reset();
   document.getElementById('f-level').value = 4;
+  updateGangStyleLabel();
   toggleGangFields(false);
   // form.reset() puts Card Type back to its first <option> (Leader) but,
   // unlike actually picking Leader from the dropdown, doesn't fire the
@@ -1646,6 +1660,8 @@ async function loadCardIntoForm(record) {
     }
   });
   const isGang = d.cardType === 'Gang';
+  gangStyleEl.value = d.gangStyle === 'Fireteam' ? 'Fireteam' : 'Gang';
+  updateGangStyleLabel();
   toggleGangFields(isGang);
   updateResetStatsVisibility(d.cardType);
   updateNpcHintVisibility(d.cardType);
@@ -1966,7 +1982,7 @@ function renderRosterWorkspace() {
       ${m.pngDataURL ? `<img class="roster-row-thumb" src="${m.pngDataURL}" alt="">` : ''}
       <div class="roster-row-body">
         <div class="roster-row-name">${escapeHtml(m.name || 'Unnamed')}</div>
-        <div class="roster-row-meta">${escapeHtml(m.cardType || 'Custom')}</div>
+        <div class="roster-row-meta">${escapeHtml(cardTypeLabel(m.cardType || 'Custom', m.gangStyle))}</div>
       </div>
       <div class="roster-row-slots">${m.slots} slot${m.slots === 1 ? '' : 's'}</div>
       <button type="button" class="roster-row-remove" data-idx="${i}" title="Remove">✕</button>
@@ -2129,7 +2145,7 @@ function buildRosterPrintData() {
     used, remaining, total: BASE_ROSTER_SLOTS, memberSlots, perkSlots, associateSlots,
     members: rosterState.members.map(m => ({
       name: m.name || 'Unnamed',
-      cardType: m.cardType || 'Custom',
+      cardType: cardTypeLabel(m.cardType || 'Custom', m.gangStyle),
       slots: m.slots || 0,
     })),
     perks: rosterState.perks.map(p => ({
@@ -2488,7 +2504,7 @@ async function renderColleaguePicker() {
     <div class="library-item">
       <img class="library-item-thumb" src="${c.pngDataURL}" alt="">
       <div class="library-item-body">
-        <span class="library-item-name">${escapeHtml(c.formData?.name || 'Unnamed')}</span><span class="library-item-level">${escapeHtml(c.formData?.cardType || 'Custom')}</span>
+        <span class="library-item-name">${escapeHtml(c.formData?.name || 'Unnamed')}</span><span class="library-item-level">${escapeHtml(cardTypeLabel(c.formData?.cardType || 'Custom', c.formData?.gangStyle))}</span>
         <div class="library-item-text">${slots} roster slot${slots === 1 ? '' : 's'}${repeatable && count ? ` · ${count} already on this roster` : ''}</div>
       </div>
       <button type="button" class="library-add-btn" data-id="${escapeAttr(c.id)}" title="${repeatable ? 'Add another copy of this card to the roster' : 'Add to roster'}">+</button>
@@ -2504,6 +2520,7 @@ async function renderColleaguePicker() {
         cardId: card.id,
         name: card.formData?.name || 'Unnamed',
         cardType: card.formData?.cardType || 'Custom',
+        gangStyle: card.formData?.gangStyle === 'Fireteam' ? 'Fireteam' : undefined,
         pngDataURL: card.pngDataURL,
         slots: slotCostForType(card.formData?.cardType),
         // Captured so the roster can auto-sort members by Level (see

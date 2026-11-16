@@ -29,6 +29,7 @@ function activateTab(tab) {
   if (tab === 'gallery') refreshGallery();
   if (tab === 'roster') refreshRosterTab();
   if (tab === 'print') refreshPrintSheet();
+  if (tab === 'adventure' && typeof refreshAdventure === 'function') refreshAdventure();
   if (tab === 'rules-index') { const ri = document.getElementById('ri-search'); if (ri) ri.focus(); }
 }
 document.getElementById('go-print').addEventListener('click', () => activateTab('print'));
@@ -2089,7 +2090,7 @@ function renderAssociates() {
           <div class="associate-ability-name">${escapeHtml(ab.name)}</div>
           ${ab.text ? `<p class="associate-ability-text">${escapeHtml(ab.text)}</p>` : ''}
         </div>
-      `).join('') : '<p class="hint" style="margin:0">No abilities on this card yet — edit it in the Card Designer.</p>'}
+      `).join('') : '<p class="hint" style="margin:0">No abilities on this card yet — edit it in the Character Cards tab.</p>'}
     `;
     rosterAssociatesEl.appendChild(item);
   });
@@ -2492,7 +2493,7 @@ async function renderColleaguePicker() {
   if (!available.length) {
     const allAdded = nonAssociateCards.length && nonAssociateCards.every(c => !isRepeatable(c) && addedCounts[c.id]);
     colleaguePickerList.innerHTML = allAdded
-      ? '<div class="library-empty">Every saved card is already on this roster (or you haven’t saved any yet in the Card Designer).</div>'
+      ? '<div class="library-empty">Every saved card is already on this roster (or you haven’t saved any yet in the Character Cards tab).</div>'
       : '<div class="library-empty">No cards match your search/Type/Theme/Affiliation filter.</div>';
     return;
   }
@@ -2591,7 +2592,7 @@ async function renderAssociatePicker() {
       ? '<div class="library-empty">Every saved Associate card is already on this roster.</div>'
       : associateCards.length
         ? '<div class="library-empty">No Associate cards match your search/Theme/Affiliation filter.</div>'
-        : '<div class="library-empty">No Associate cards saved yet — build one in the Card Designer first (Card Type: Associate).</div>';
+        : '<div class="library-empty">No Associate cards saved yet — build one in the Character Cards tab first (Card Type: Associate).</div>';
     return;
   }
   associatePickerList.innerHTML = available.map(c => {
@@ -2743,8 +2744,8 @@ function setLastBackupAt(ts) {
 async function refreshBackupBanner() {
   if (backupBannerDismissed) { backupBanner.classList.add('hidden'); return; }
   const lastBackupAt = getLastBackupAt();
-  const [cards, rosters] = await Promise.all([getAllCards(), getAllRosters()]);
-  const changedCount = [...cards, ...rosters].filter(r => (r.updatedAt || 0) > lastBackupAt).length;
+  const [cards, rosters, adv] = await Promise.all([getAllCards(), getAllRosters(), getAllAdventure()]);
+  const changedCount = [...cards, ...rosters, ...adv].filter(r => (r.updatedAt || 0) > lastBackupAt).length;
   if (changedCount < BACKUP_NAG_THRESHOLD) { backupBanner.classList.add('hidden'); return; }
   backupBannerText.textContent = lastBackupAt
     ? `${changedCount} cards/rosters changed since your last backup — everything only lives in this browser.`
@@ -2763,7 +2764,7 @@ document.getElementById('backup-reminder-dismiss').addEventListener('click', () 
 document.getElementById('btn-export-backup').addEventListener('click', async () => {
   const themeFilter = backupThemeFilterSelect.value;
   const data = await exportAllData(themeFilter || undefined);
-  if (!data.cards.length && !data.rosters.length) {
+  if (!data.cards.length && !data.rosters.length && !data.adventureCards.length) {
     alert(themeFilter
       ? `No cards found in the “${themeFilter}” Theme yet.`
       : 'Nothing saved yet — build and save a card or roster first.');
@@ -2804,12 +2805,13 @@ importBackupFile.addEventListener('change', async (e) => {
   }
   const cardCount = Array.isArray(data?.cards) ? data.cards.length : 0;
   const rosterCount = Array.isArray(data?.rosters) ? data.rosters.length : 0;
-  if (!cardCount && !rosterCount) {
+  const adventureCount = Array.isArray(data?.adventureCards) ? data.adventureCards.length : 0;
+  if (!cardCount && !rosterCount && !adventureCount) {
     alert('This file doesn’t look like a Pulp Alley Card Maker backup.');
     return;
   }
   const proceed = confirm(
-    `Import ${cardCount} card(s) and ${rosterCount} roster(s) from this backup?\n\n` +
+    `Import ${cardCount} card(s), ${rosterCount} roster(s) and ${adventureCount} Adventure card(s) from this backup?\n\n` +
     `Anything already saved here with a matching ID will be overwritten by the backup’s version. Nothing else is deleted.`
   );
   if (!proceed) return;
@@ -2818,8 +2820,9 @@ importBackupFile.addEventListener('change', async (e) => {
     state.selected.clear();
     await refreshGallery();
     await refreshRosterTab();
+    if (typeof refreshAdventure === 'function') await refreshAdventure();
     refreshBackupBanner();
-    saveStatus.textContent = `Imported ${result.cardsImported} card(s) and ${result.rostersImported} roster(s).`;
+    saveStatus.textContent = `Imported ${result.cardsImported} card(s), ${result.rostersImported} roster(s) and ${result.adventureImported} Adventure card(s).`;
     setTimeout(() => { saveStatus.textContent = ''; }, 4000);
   } catch (err) {
     alert('Import failed: ' + err.message);
@@ -2857,8 +2860,9 @@ async function refreshTrashModal() {
     return;
   }
   trashListEl.innerHTML = trash.map(entry => {
-    const isCard = entry.kind === 'card';
-    const name = isCard ? (entry.record.formData?.name || 'Unnamed') : (entry.record.name || 'Untitled Roster');
+    const isAdv = entry.kind === 'adventure';
+    const isCard = entry.kind === 'card' || isAdv;
+    const name = isAdv ? (entry.record.formData?.title || 'Untitled') : isCard ? (entry.record.formData?.name || 'Unnamed') : (entry.record.name || 'Untitled Roster');
     const daysLeft = Math.max(0, TRASH_RETENTION_DAYS - Math.floor((Date.now() - entry.deletedAt) / 86400000));
     const thumb = isCard
       ? `<img class="library-item-thumb" src="${entry.record.pngDataURL}" alt="">`
@@ -2867,7 +2871,7 @@ async function refreshTrashModal() {
       <div class="library-item" data-trash-id="${escapeAttr(entry.id)}">
         ${thumb}
         <div class="library-item-body">
-          <span class="library-item-name">${escapeHtml(name)}</span><span class="library-item-level">${isCard ? 'Card' : 'Roster'}</span>
+          <span class="library-item-name">${escapeHtml(name)}</span><span class="library-item-level">${isAdv ? 'Adventure card' : isCard ? 'Card' : 'Roster'}</span>
           <div class="library-item-text">Deleted ${formatDaysAgo(entry.deletedAt)} — ${daysLeft > 0 ? `auto-removes in ${daysLeft} day${daysLeft === 1 ? '' : 's'}` : 'auto-removing soon'}</div>
         </div>
         <div class="library-item-actions">
@@ -2895,6 +2899,7 @@ trashListEl.addEventListener('click', async (e) => {
   if (btn.dataset.trashAct === 'restore') {
     const kind = await restoreFromTrash(trashId);
     if (kind === 'card') { await refreshGallery(); getAllCards().then(refreshThemeOptions); }
+    else if (kind === 'adventure') { if (typeof refreshAdventure === 'function') await refreshAdventure(); }
     else if (kind === 'roster') { await refreshRosterTab(); }
     await refreshTrashModal();
     refreshBackupBanner();

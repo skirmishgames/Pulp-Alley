@@ -107,12 +107,12 @@ body {
 .backup-reminder-banner .btn-primary { padding: 6px 12px; font-size: 12.5px; }
 .backup-reminder-banner .btn-ghost { padding: 4px 8px; font-size: 14px; }
 
-.tabs { display: flex; gap: 6px; }
+.tabs { display: flex; gap: 2px; }
 .tab-btn {
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-dim);
-  padding: 9px 16px;
+  padding: 9px 9px;
   border-radius: 999px;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
@@ -810,7 +810,7 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1p
 }
 
 @media print {
-  header.topbar, .site-footer, #backup-reminder-banner, .panel > .gallery-toolbar, main > .panel > p.hint, #tab-designer, #tab-gallery, #tab-rules-index { display: none !important; }
+  header.topbar, .site-footer, #backup-reminder-banner, .panel > .gallery-toolbar, main > .panel > p.hint, #tab-designer, #tab-gallery, #tab-rules-index, #tab-adventure { display: none !important; }
   body { background: white; }
   main { padding: 0; max-width: none; }
   .panel { border: none; padding: 0; background: white; }
@@ -1123,3 +1123,47 @@ body.copying-roster-sheet #roster-print-sheet {
 }
 
 .gang-style-field { min-width: 140px; }
+
+/* ===================== Adventure Cards ===================== */
+.ac-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(330px, 400px) minmax(300px, 1fr); gap: 16px; align-items: start; }
+.ac-h { font-family: 'Rajdhani', sans-serif; margin: 0 0 4px; font-size: 22px; }
+.ac-form-panel, .ac-deck-panel { max-height: calc(100vh - 120px); overflow-y: auto; }
+.ac-preview-panel { position: sticky; top: 12px; display: grid; gap: 12px; justify-items: center; }
+#ac-canvas { width: 100%; max-width: 360px; height: auto; aspect-ratio: 750 / 1050; border-radius: 6px; box-shadow: 0 6px 22px rgba(0,0,0,0.28); background: #222; }
+.ac-side-toggle { display: flex; gap: 6px; }
+.ac-side-toggle .btn-secondary.active { background: var(--accent); color: #06231f; border-color: var(--accent); }
+.ac-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.ac-skills { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 4px; }
+.ac-block { display: block; margin-top: 8px; }
+.ac-block textarea, .ac-block input[type="text"] { display: block; width: 100%; margin-top: 4px; box-sizing: border-box; }
+textarea {
+  font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ac-img-controls { display: grid; gap: 8px; margin-top: 10px; }
+.ac-img-controls label { display: grid; gap: 2px; }
+.ac-deck-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.ac-list { display: grid; gap: 10px; margin-top: 10px; }
+.ac-item { display: grid; grid-template-columns: auto 74px 1fr; gap: 10px; align-items: start; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel-2); }
+.ac-item.selected { border-color: var(--accent); }
+.ac-item img { width: 74px; aspect-ratio: 750 / 1050; object-fit: cover; border-radius: 4px; display: block; }
+.ac-item-title { font-weight: 700; }
+.ac-item-meta { color: var(--text-dim); font-size: 12.5px; margin: 2px 0 6px; }
+.ac-item-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.ac-item-actions button { padding: 4px 9px; font-size: 12px; }
+@media (max-width: 1150px) {
+  .ac-grid { grid-template-columns: minmax(300px, 1fr) minmax(300px, 380px); }
+  .ac-deck-panel { grid-column: 1 / -1; max-height: none; }
+}
+@media (max-width: 760px) {
+  .ac-grid { grid-template-columns: 1fr; }
+  .ac-form-panel { max-height: none; }
+  .ac-preview-panel { position: static; }
+}
+.ac-form-panel .hint, .ac-deck-panel .hint { margin: 6px 0 12px; }
+.ac-form-panel .field-row { margin-top: 8px; }
+.ac-form-panel fieldset { margin-top: 12px; }
+
+/* Adventure card title: first and most prominent field on the form */
+.ac-title-row input { font-size: 1.05rem; font-weight: 600; padding: 10px 12px; }

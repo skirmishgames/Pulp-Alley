@@ -6,7 +6,7 @@ accounts, no build step — open `index.html` (or host it on GitHub Pages) and g
 
 ## Features
 
-- **Card Designer** — enter Name, Level, the six stats (Brawl, Shoot, Dodge,
+- **Character Cards** (the designer) — enter Name, Level, the six stats (Brawl, Shoot, Dodge,
   Might, Finesse, Cunning as dice pools), any number of Abilities, an optional
   flavor quote, and a starting Health die. The Portrait Image control sits
   right under the live card preview (next to Save/Download/New) rather than
@@ -240,7 +240,7 @@ accounts, no build step — open `index.html` (or host it on GitHub Pages) and g
   sub-group into the Theme name itself (which would turn "Star Wars" into
   several unrelated Theme entries and break filtering/renaming "every Star
   Wars card" as one group). Works like Theme — same free-text field with
-  autocomplete in the Card Designer, its own "Filter by Affiliation"
+  autocomplete in the Character Cards tab, its own "Filter by Affiliation"
   dropdown (with a "No Affiliation" option) in My Cards and the League
   Roster's "Add from My Cards" picker, and its own "Rename Affiliation"
   button that bulk-renames every card carrying it. The two filters combine
@@ -268,7 +268,7 @@ accounts, no build step — open `index.html` (or host it on GitHub Pages) and g
   can be added more than once — the picker keeps offering it (showing a
   running "N already on this roster" count) and each copy costs its own 2
   slots. Any other Card Type can opt into the same behaviour with the
-  Card Designer's "Non-Unique" checkbox — check it for a card that
+  Character Cards "Non-Unique" checkbox — check it for a card that
   represents a type rather than a single named individual (e.g. a generic
   Rebel Commando or Scout Trooper Ally/Follower, as opposed to a named
   hero or villain), and it's then added and re-offered by the picker the
@@ -291,7 +291,7 @@ accounts, no build step — open `index.html` (or host it on GitHub Pages) and g
   alongside any of the three triggers a roster warning.
 - **Associates** (p. 27-28) — non-character support cast (a butler, a
   bartender, a mentor, and so on) that cost 1 roster slot each. Build one as
-  its own Card Type in the Card Designer (see "Associate Card Type" below),
+  its own Card Type in the Character Cards tab (see "Associate Card Type" below),
   then add it to a roster with "+ Add from My Cards" — the same picker
   pattern Colleagues already use, listing only your saved Associate cards
   and snapshotting its name, portrait, and abilities onto the roster.
@@ -439,7 +439,7 @@ from `file://`.
 ## Project structure
 
 ```
-index.html          Single-page app (Card Designer / My Cards / League Roster / Print Sheet / Quick Reference / About)
+index.html          Single-page app (Character Cards / Adventure Cards / My Cards / League Roster / Print Sheet / Quick Reference / Rules Index / About)
 css/styles.css       App UI styling
 css/fonts.css         Self-hosted Inter + Rajdhani font faces
 js/cardRenderer.js    Canvas renderer for a single card (750x1050px portrait; 1050x750px landscape for the Associate Card Type)

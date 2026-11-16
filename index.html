@@ -30,7 +30,8 @@
   </div>
   <nav class="tabs">
     <button type="button" id="btn-theme-toggle" class="btn-secondary btn-icon" title="Switch to Dark mode" aria-label="Switch to Dark mode">☾</button>
-    <button class="tab-btn active" data-tab="designer">Card Designer</button>
+    <button class="tab-btn active" data-tab="designer">Character Cards</button>
+    <button class="tab-btn" data-tab="adventure">Adventure Cards</button>
     <button class="tab-btn" data-tab="gallery">My Cards</button>
     <button class="tab-btn" data-tab="roster">League Roster</button>
     <button class="tab-btn" data-tab="print">Print Sheet (A4)</button>
@@ -354,7 +355,7 @@
       </div>
     </div>
     <div id="gallery-grid" class="gallery-grid"></div>
-    <p id="gallery-empty" class="hint">No saved cards yet. Build one in the Card Designer tab and hit “Save to My Cards.”</p>
+    <p id="gallery-empty" class="hint">No saved cards yet. Build one in the Character Cards tab and hit “Save to My Cards.”</p>
     <p id="gallery-no-match" class="hint" style="display:none">No cards match your search/filter.</p>
   </div>
 </section>
@@ -395,7 +396,7 @@
           <button type="button" id="open-colleague-picker" class="btn-secondary">+ Add from My Cards</button>
         </div>
         <div id="roster-members" class="roster-list"></div>
-        <p id="roster-members-empty" class="hint">No colleagues yet. Save some characters in the Card Designer first, then add them here.</p>
+        <p id="roster-members-empty" class="hint">No colleagues yet. Save some characters in the Character Cards tab first, then add them here.</p>
       </div>
 
       <div class="roster-column">
@@ -412,10 +413,10 @@
           <h3>Associates</h3>
           <button type="button" id="open-associate-picker" class="btn-secondary">+ Add from My Cards</button>
         </div>
-        <p class="hint">Non-character support cast (p. 27) — a helpful butler, bartender, mentor, and so on. Build one as an Associate card in the Card Designer, then add it here. Each costs 1 roster slot. A league normally starts with at most 2.</p>
+        <p class="hint">Non-character support cast (p. 27) — a helpful butler, bartender, mentor, and so on. Build one as an Associate card in the Character Cards tab, then add it here. Each costs 1 roster slot. A league normally starts with at most 2.</p>
         <div id="associate-warnings" class="roster-warnings"></div>
         <div id="roster-associates" class="associates-list"></div>
-        <p id="roster-associates-empty" class="hint">No Associates yet. Save some Associate cards in the Card Designer first, then add them here.</p>
+        <p id="roster-associates-empty" class="hint">No Associates yet. Save some Associate cards in the Character Cards tab first, then add them here.</p>
       </div>
     </div>
   </div>
@@ -434,6 +435,150 @@
     </div>
     <p class="hint">Cards render at true Standard Playing Card size (2.5″ × 3.5″) on A4 pages with crop marks, 9 per page — select more than 9 in My Cards and they spill onto additional pages automatically. Print at 100% scale / “Actual size” — do not use “Fit to page.”</p>
     <div class="sheet-stage" id="sheet-stage"></div>
+  </div>
+</section>
+
+<!-- ===================== ADVENTURE CARDS ===================== -->
+<section id="tab-adventure" class="tab-panel">
+  <div class="ac-grid">
+    <div class="panel ac-form-panel">
+      <h2 class="ac-h">Adventure Card</h2>
+      <p class="hint">Pre-written plot points for your scenarios: Challenges, Perils, Rewards and Spoilers. Your own cards, saved in your own Adventure Deck.</p>
+      <form id="ac-form" autocomplete="off" onsubmit="return false">
+        <div class="field-row ac-title-row">
+          <label class="grow">Card title
+            <input type="text" id="ac-title" maxlength="40" placeholder="e.g. Strong-Arm" autocomplete="off">
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="grow">Card kind
+            <select id="ac-kind">
+              <option value="Challenge">Challenge (plot point)</option>
+              <option value="Peril">Peril</option>
+              <option value="Reward">Reward</option>
+              <option value="Spoiler">Spoiler</option>
+            </select>
+          </label>
+          <label class="grow">Card back
+            <select id="ac-style">
+              <option value="yellow">Pulp yellow</option>
+              <option value="parchment">Art Deco</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint" id="ac-kind-hint"></p>
+        <p class="hint">Use one card back for a whole deck so the backs match.</p>
+
+        <div class="field-row" id="ac-preset-row" style="display:none">
+          <label class="grow">Spoiler title
+            <select id="ac-preset">
+              <option value="">Custom title</option>
+              <option>Red Herring</option>
+              <option>It&rsquo;s a Trap!</option>
+              <option>Unexpected Twist</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset id="ac-roll-fieldset">
+          <legend>Challenge</legend>
+          <div class="ac-skills" id="ac-skills"></div>
+          <p class="hint">Tick every skill that can be used. Two or more print as &ldquo;Finesse or Cunning&rdquo;.</p>
+          <div class="field-row">
+            <label class="narrow">Successes
+              <select id="ac-successes"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset id="ac-passfail-fieldset">
+          <legend>Result</legend>
+          <label class="ac-block" id="ac-pass-label">Pass
+            <textarea id="ac-pass" rows="2" maxlength="220" placeholder="e.g. Draw 1 Fortune card (one-use)."></textarea>
+          </label>
+          <label class="ac-block" id="ac-fail-label">Fail
+            <textarea id="ac-fail" rows="2" maxlength="220" placeholder="e.g. Discard 1 random Fortune card."></textarea>
+          </label>
+          <p class="hint" id="ac-peril-hint" style="display:none">A failed Peril also prints &ldquo;Suffer N hits&rdquo; first, using the number of successes (Core Rules p. 45). Add any extra effect above.</p>
+        </fieldset>
+
+        <fieldset id="ac-reward-fieldset" style="display:none">
+          <legend>Reward</legend>
+          <label class="ac-block">Scenario Reward
+            <textarea id="ac-scenario-reward" rows="2" maxlength="220" placeholder="Applies to the character holding the plot point. Does not carry over."></textarea>
+          </label>
+          <label class="ac-block">League Reward
+            <textarea id="ac-league-reward" rows="2" maxlength="220" placeholder="Experience, Resources and other advantages for the league."></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset id="ac-spoiler-fieldset" style="display:none">
+          <legend>Spoiler</legend>
+          <p class="hint">Prints &ldquo;This is not a reward. You do not become Director.&rdquo; (Core Rules p. 56).</p>
+          <label class="ac-block">Last line
+            <input type="text" id="ac-spoiler-note" maxlength="80" value="See the scenario for details.">
+          </label>
+        </fieldset>
+
+        <div class="field-row">
+          <label class="grow">Quote (optional)
+            <input type="text" id="ac-quote" maxlength="90" placeholder="Short flavour line">
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="grow">Deck name (optional)
+            <input type="text" id="ac-deck" maxlength="20" placeholder="e.g. PA SC">
+          </label>
+          <label class="narrow">Number
+            <input type="text" id="ac-number" maxlength="8" placeholder="optional">
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>Image</legend>
+          <input type="file" id="ac-image-file" accept="image/*">
+          <div class="ac-img-controls" id="ac-img-controls" style="display:none">
+            <label>Zoom <input type="range" id="ac-zoom" min="1" max="3" step="0.05" value="1"></label>
+            <label>Left / right <input type="range" id="ac-pan-x" min="-1" max="1" step="0.02" value="0"></label>
+            <label>Up / down <input type="range" id="ac-pan-y" min="-1" max="1" step="0.02" value="0"></label>
+            <label class="checkbox-label" id="ac-sepia-label"><input type="checkbox" id="ac-sepia" checked> Sepia tone</label>
+            <button type="button" id="ac-remove-image" class="btn-secondary">Remove image</button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+
+    <div class="panel ac-preview-panel">
+      <div class="ac-side-toggle">
+        <button type="button" class="btn-secondary active" id="ac-show-front">Front</button>
+        <button type="button" class="btn-secondary" id="ac-show-back">Back</button>
+      </div>
+      <canvas id="ac-canvas" width="750" height="1050"></canvas>
+      <div class="ac-actions">
+        <button type="button" id="ac-save" class="btn-primary">Save to Adventure Deck</button>
+        <button type="button" id="ac-new" class="btn-secondary">New Card</button>
+        <button type="button" id="ac-png" class="btn-secondary">Download front PNG</button>
+        <button type="button" id="ac-png-back" class="btn-secondary">Download back PNG</button>
+      </div>
+      <p class="hint" id="ac-save-status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel ac-deck-panel">
+      <div class="gallery-toolbar">
+        <h2 id="ac-deck-title">Adventure Deck</h2>
+      </div>
+      <div class="ac-deck-tools">
+        <select id="ac-filter-kind" class="theme-filter-select" aria-label="Filter by kind">
+          <option value="">All kinds</option>
+          <option>Challenge</option><option>Peril</option><option>Reward</option><option>Spoiler</option>
+        </select>
+        <button type="button" id="ac-select-all" class="btn-secondary">Select all</button>
+        <button type="button" id="ac-pdf" class="btn-primary">Print selected (PDF)</button>
+      </div>
+      <p class="hint">PDF: A4, 9 cards per page with crop marks. Fronts first, then backs (flipped for double-sided printing). Print at 100%.</p>
+      <div id="ac-list" class="ac-list"></div>
+      <p id="ac-empty" class="hint">No Adventure cards yet. Build one and press Save.</p>
+    </div>
   </div>
 </section>
 
@@ -794,7 +939,7 @@
     <div class="about-block">
       <h2>About Pulp Alley Card Maker</h2>
       <p>Pulp Alley Card Maker is a free, unofficial tool for designing character cards and building leagues for <strong>Pulp Alley 2nd Edition</strong>, the pulp adventure skirmish game by David Phipps. Make Leaders, Sidekicks, Allies, Followers and Gangs, plus Associates and Villain or Creature NPCs. Picking a Card Type fills in Level, Health and starting dice under the Core Rules (pp. 8-9), and the Ability Library holds 153 abilities and 41 Background Perks to build from.</p>
-      <p>League Roster checks your league against the Core Rules roster slots (p. 8), Print Sheet lays saved cards out for cutting, and Quick Reference gives you a two-page cheat sheet for the table.</p>
+      <p>League Roster checks your league against the Core Rules roster slots (p. 8), Print Sheet lays saved cards out for cutting, Adventure Cards lets you design your own Challenge, Peril, Reward and Spoiler cards for scenarios, and Quick Reference gives you a two-page cheat sheet for the table.</p>
     </div>
 
     <div class="about-block">
@@ -1000,5 +1145,7 @@
 <script src="js/rulesIndexData.js"></script>
 <script src="js/rulesIndex.js"></script>
 <script src="js/app.js"></script>
+<script src="js/adventureRenderer.js"></script>
+<script src="js/adventure.js"></script>
 </body>
 </html>

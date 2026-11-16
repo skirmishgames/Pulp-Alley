@@ -1,7 +1,8 @@
 // db.js — tiny IndexedDB wrapper for saved cards + league rosters
 const DB_NAME = 'pulp-alley-cards';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE = 'cards';
+const ADV_STORE = 'adventure';
 const ROSTER_STORE = 'rosters';
 const TRASH_STORE = 'trash';
 const TRASH_RETENTION_DAYS = 30;
@@ -23,6 +24,13 @@ function openDB() {
       // gone for good — see trashCard()/trashRoster() below. Keyed by
       // "<kind>:<originalId>" rather than the original record's own id, so
       // a card and a roster (separate id spaces) can never collide here.
+      // Adventure Deck cards (Challenge/Peril/Reward/Spoiler) live in their own
+      // store so they never mix with character cards in My Cards, the League
+      // Roster or the character Print Sheet.
+      if (!db.objectStoreNames.contains(ADV_STORE)) {
+        const advStore = db.createObjectStore(ADV_STORE, { keyPath: 'id' });
+        advStore.createIndex('updatedAt', 'updatedAt');
+      }
       if (!db.objectStoreNames.contains(TRASH_STORE)) {
         const trashStore = db.createObjectStore(TRASH_STORE, { keyPath: 'id' });
         trashStore.createIndex('deletedAt', 'deletedAt');
@@ -72,6 +80,51 @@ async function getCard(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readonly');
     const req = tx.objectStore(STORE).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ---------------- Adventure cards ----------------
+async function saveAdventure(record) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ADV_STORE, 'readwrite');
+    tx.objectStore(ADV_STORE).put(record);
+    tx.oncomplete = () => resolve(record);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteAdventure(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ADV_STORE, 'readwrite');
+    tx.objectStore(ADV_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getAllAdventure() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ADV_STORE, 'readonly');
+    const req = tx.objectStore(ADV_STORE).getAll();
+    req.onsuccess = () => {
+      const items = req.result || [];
+      items.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      resolve(items);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAdventure(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ADV_STORE, 'readonly');
+    const req = tx.objectStore(ADV_STORE).get(id);
     req.onsuccess = () => resolve(req.result || null);
     req.onerror = () => reject(req.error);
   });
@@ -154,6 +207,14 @@ async function trashCard(id) {
   return true;
 }
 
+async function trashAdventure(id) {
+  const record = await getAdventure(id);
+  if (!record) return false;
+  await moveToTrash('adventure', record);
+  await deleteAdventure(id);
+  return true;
+}
+
 async function trashRoster(id) {
   const record = await getRoster(id);
   if (!record) return false;
@@ -201,6 +262,7 @@ async function restoreFromTrash(trashId) {
   });
   if (!entry) return null;
   if (entry.kind === 'card') await saveCard(entry.record);
+  else if (entry.kind === 'adventure') await saveAdventure(entry.record);
   else await saveRoster(entry.record);
   await removeFromTrash(trashId);
   return entry.kind;
@@ -236,11 +298,13 @@ const BACKUP_SCHEMA_VERSION = 1;
 // (keeping a themed export small and self-contained). Leaving themeFilter
 // unset exports everything, unchanged from before this option existed.
 async function exportAllData(themeFilter) {
-  const [allCards, allRosters] = await Promise.all([getAllCards(), getAllRosters()]);
+  const [allCards, allRosters, allAdventure] = await Promise.all([getAllCards(), getAllRosters(), getAllAdventure()]);
   const cards = themeFilter
     ? allCards.filter(c => (c.formData?.collection || '') === themeFilter)
     : allCards;
   const rosters = themeFilter ? [] : allRosters;
+  // Adventure cards have no Theme, so a Theme-filtered export leaves them out, like rosters.
+  const adventureCards = themeFilter ? [] : allAdventure;
   return {
     app: BACKUP_APP_ID,
     schemaVersion: BACKUP_SCHEMA_VERSION,
@@ -248,6 +312,7 @@ async function exportAllData(themeFilter) {
     themeFilter: themeFilter || null,
     cards,
     rosters,
+    adventureCards,
   };
 }
 
@@ -261,6 +326,7 @@ async function importAllData(data) {
   }
   let cardsImported = 0;
   let rostersImported = 0;
+  let adventureImported = 0;
   for (const card of data.cards) {
     if (!card || !card.id) continue;
     await saveCard(card);
@@ -271,5 +337,11 @@ async function importAllData(data) {
     await saveRoster(roster);
     rostersImported++;
   }
-  return { cardsImported, rostersImported };
+  // Older backups have no adventureCards list; that's fine.
+  for (const card of (Array.isArray(data.adventureCards) ? data.adventureCards : [])) {
+    if (!card || !card.id) continue;
+    await saveAdventure(card);
+    adventureImported++;
+  }
+  return { cardsImported, rostersImported, adventureImported };
 }

@@ -23,6 +23,11 @@ const canvas = document.getElementById('card-canvas');
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => activateTab(btn.dataset.tab));
 });
+// True on iPad / phone touch screens (no mouse or trackpad as main pointer).
+function isTouchScreen() {
+  return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+}
+
 function activateTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `tab-${tab}`));
@@ -30,7 +35,14 @@ function activateTab(tab) {
   if (tab === 'roster') refreshRosterTab();
   if (tab === 'print') refreshPrintSheet();
   if (tab === 'adventure' && typeof refreshAdventure === 'function') refreshAdventure();
-  if (tab === 'rules-index') { const ri = document.getElementById('ri-search'); if (ri) ri.focus(); }
+  // On touch screens focusing the search box would pop up the keyboard
+  // every time the tab opens, so only do it with a mouse or trackpad.
+  if (tab === 'rules-index' && !isTouchScreen()) { const ri = document.getElementById('ri-search'); if (ri) ri.focus(); }
+  // On phones the tab menu is a swipeable row: keep the active tab in view.
+  const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+  if (btn && btn.scrollIntoView && btn.parentElement.scrollWidth > btn.parentElement.clientWidth) {
+    btn.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
 }
 document.getElementById('go-print').addEventListener('click', () => activateTab('print'));
 
@@ -309,7 +321,7 @@ document.getElementById('open-ability-library').addEventListener('click', () => 
   libraryLevel = 'all';
   libraryModal.classList.remove('hidden');
   renderLibraryList();
-  librarySearch.focus();
+  if (!isTouchScreen()) librarySearch.focus(); // no surprise keyboard on iPad
 });
 document.getElementById('close-ability-library').addEventListener('click', closeLibrary);
 libraryModal.addEventListener('click', (e) => {
@@ -416,7 +428,7 @@ openAssetLibraryBtn.addEventListener('click', () => {
   assetLibrarySearch.value = '';
   assetLibraryModal.classList.remove('hidden');
   renderAssetLibraryList();
-  assetLibrarySearch.focus();
+  if (!isTouchScreen()) assetLibrarySearch.focus(); // no surprise keyboard on iPad
 });
 document.getElementById('close-asset-library').addEventListener('click', closeAssetLibrary);
 assetLibraryModal.addEventListener('click', (e) => {
@@ -2639,7 +2651,7 @@ let perkSlotFilter = 'all';
 document.getElementById('open-perk-library').addEventListener('click', () => {
   perkLibraryModal.classList.remove('hidden');
   renderPerkLibrary();
-  perkSearch.focus();
+  if (!isTouchScreen()) perkSearch.focus(); // no surprise keyboard on iPad
 });
 document.getElementById('close-perk-library').addEventListener('click', () => {
   perkLibraryModal.classList.add('hidden');

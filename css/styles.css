@@ -1167,3 +1167,65 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* Adventure card title: first and most prominent field on the form */
 .ac-title-row input { font-size: 1.05rem; font-weight: 600; padding: 10px 12px; }
+
+/* ===================== Tablets, phones and touch (iPadOS) ===================== */
+/* Tabs and toolbars wrap instead of running off the screen. */
+.tabs { flex-wrap: wrap; }
+.tab-btn { white-space: nowrap; }
+.gallery-meta, .backup-actions { flex-wrap: wrap; }
+
+/* iOS Safari counts its own toolbars in 100vh; dvh is the visible height. */
+@supports (height: 100dvh) {
+  .form-panel, .ac-form-panel, .ac-deck-panel { max-height: calc(100dvh - 120px); }
+}
+
+/* Card Designer on tablets in landscape (iPad 1024 to 1366 wide): the two
+   form panels stack on the left and the card preview stays in view on the
+   right while you scroll, instead of sitting below both forms. */
+@media (min-width: 980px) and (max-width: 1370px) {
+  .designer-grid { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); }
+  .designer-col-left { grid-column: 1; grid-row: 1; }
+  .designer-col-right { grid-column: 1; grid-row: 2; }
+  #preview-panel { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
+  .designer-grid .form-panel { max-height: none; overflow: visible; }
+}
+/* Portrait tablets and phones: one column, with the preview right after the
+   name and type fields so you see the card before the stats and abilities. */
+@media (max-width: 979px) {
+  .designer-col-left { order: 1; }
+  #preview-panel { order: 2; position: static; }
+  .designer-col-right { order: 3; }
+  .designer-grid .form-panel { max-height: none; overflow: visible; }
+}
+
+/* Touch screens: a header that does not eat the screen, text fields that do
+   not make iOS zoom in (it zooms on anything under 16px), and tap targets
+   of about 40px. */
+@media (pointer: coarse) {
+  header.topbar { position: static; }
+  .preview-panel, .ac-preview-panel { top: 12px; }
+  input[type="text"], input[type="number"], input[type="search"], input[type="email"], select, textarea,
+  .ability-item input, .ability-item textarea { font-size: 16px; }
+  input[type="checkbox"], input[type="radio"] { width: 22px; height: 22px; flex: none; }
+  .tab-btn { padding: 11px 13px; }
+  .btn-icon { width: 42px; height: 42px; font-size: 18px; }
+  .btn-primary, .btn-secondary, .btn-ghost, .btn-danger, .backup-actions .btn-secondary { min-height: 40px; }
+  .ability-remove, .ability-reset-name { padding: 8px 10px; }
+  .site-footer a { display: inline-block; padding: 8px 4px; }
+  .stat-row select { width: 64px; }
+}
+@media (max-width: 979px) {
+  .designer-grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* Phones: the tab menu becomes one swipeable row instead of four rows of
+   buttons, and two-column form blocks drop to one column. */
+@media (max-width: 760px) {
+  header.topbar { position: static; padding: 10px 14px; }
+  main { padding: 16px 12px 48px; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs .tab-btn, .tabs .btn-icon { flex: none; }
+  .backup-actions { width: 100%; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .ac-grid { grid-template-columns: minmax(0, 1fr); }
+}
